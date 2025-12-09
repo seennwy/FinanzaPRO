@@ -4,20 +4,19 @@ import { Transaction, Language, Currency, Theme, User, RecurringItem } from './t
 import { INCOME_CATEGORIES as DEFAULT_INCOME, EXPENSE_CATEGORIES as DEFAULT_EXPENSE, RECURRING_ITEMS as DEFAULT_RECURRING, TRANSLATIONS } from './constants';
 import { TransactionList } from './components/TransactionList';
 import { Analytics } from './components/Analytics';
-import { ChatAssistant } from './components/ChatAssistant';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { SettingsModal } from './components/SettingsModal';
 import { ProfileModal } from './components/ProfileModal';
 import { db } from './services/db';
 import { exportToCSV, parseCSV } from './services/dataService';
-import { LayoutDashboard, Plus, X, Activity, MessageSquare, Settings, User as UserIcon, Loader2, ArrowUp, Zap } from 'lucide-react';
+import { LayoutDashboard, Plus, X, Activity, Settings, User as UserIcon, Loader2, ArrowUp, Zap } from 'lucide-react';
 
 export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'chat'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics'>('dashboard');
   
   // Global Settings State
   const [language, setLanguage] = useState<Language>('es');
@@ -250,8 +249,7 @@ export default function App() {
           <nav className="flex items-center gap-1 p-1 bg-surfaceHighlight rounded-full border border-white/5">
             {[
               { id: 'dashboard', label: t.dashboard },
-              { id: 'analytics', label: t.data },
-              { id: 'chat', label: t.aiCoach }
+              { id: 'analytics', label: t.data }
             ].map((tab) => (
               <button 
                 key={tab.id}
@@ -358,12 +356,6 @@ export default function App() {
           {activeTab === 'analytics' && (
             <Analytics transactions={transactions} currency={currency} t={t} />
           )}
-
-          {activeTab === 'chat' && (
-            <div className="max-w-3xl mx-auto">
-              <ChatAssistant transactions={transactions} lang={language} currency={currency} t={t} />
-            </div>
-          )}
         </div>
       </main>
 
@@ -395,19 +387,6 @@ export default function App() {
           >
              <Activity className="w-5 h-5" strokeWidth={activeTab === 'analytics' ? 2.5 : 2} />
              <span className="text-[9px] font-bold tracking-wide">{t.data}</span>
-          </button>
-
-          {/* Chat Tab */}
-          <button 
-             onClick={() => setActiveTab('chat')}
-             className={`flex-1 h-full flex flex-col items-center justify-center gap-0.5 rounded-full transition-all duration-300 ${
-               activeTab === 'chat' 
-                 ? 'bg-textMain text-background shadow-lg' 
-                 : 'text-textMuted hover:text-textMain'
-             }`}
-          >
-             <MessageSquare className="w-5 h-5" strokeWidth={activeTab === 'chat' ? 2.5 : 2} />
-             <span className="text-[9px] font-bold tracking-wide">{t.aiCoach}</span>
           </button>
         </div>
 
