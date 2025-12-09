@@ -12,7 +12,7 @@ interface Props {
   theme: Theme;
 }
 
-export const AuthModal: React.FC<Props> = ({ isOpen, onClose, onLogin, onRegister, t, theme }) => {
+export const AuthModal: React.FC<Props> = ({ isOpen, onClose, onLogin, onRegister, t }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +33,6 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, onLogin, onRegiste
       } else {
         await onRegister(email, password, name);
       }
-      // If successful, onLogin/onRegister in parent will close modal
     } catch (err: any) {
       if (err.message === 'User already exists') {
         setError(t.errorUserExists);
@@ -48,20 +47,20 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, onLogin, onRegiste
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className={`w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-scale-in border ${theme === 'light' ? 'bg-white border-gray-200' : 'bg-surface border-white/10'}`}>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="glass-strong w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-scale-in border border-gray-200 dark:border-white/10">
         
         {/* Header */}
-        <div className={`p-6 border-b flex justify-between items-center ${theme === 'light' ? 'bg-gray-50 border-gray-200' : 'bg-surfaceHighlight border-white/10'}`}>
-          <h3 className={`text-sm font-bold uppercase tracking-widest ${theme === 'light' ? 'text-black' : 'text-white'}`}>
+        <div className="p-6 border-b border-gray-200 dark:border-white/5 bg-surfaceHighlight flex justify-between items-center">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-textMain">
              {isLogin ? t.login : t.signup}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-primary transition-colors">
+          <button onClick={onClose} className="text-textMuted hover:text-textMain transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-8">
+        <div className="p-8 bg-surface">
           {error && (
             <div className="mb-6 p-3 bg-danger/10 border border-danger/20 rounded-xl flex items-center gap-3 text-danger text-sm font-bold">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -75,14 +74,14 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, onLogin, onRegiste
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-textMuted uppercase tracking-widest">{t.name}</label>
                 <div className="relative">
-                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-textMuted" />
                   <input 
                     type="text" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required 
-                    className={`w-full p-4 pl-11 border rounded-xl focus:border-primary focus:outline-none text-sm transition-colors ${theme === 'light' ? 'bg-gray-50 border-gray-200 text-black' : 'bg-background border-white/10 text-white'}`}
-                    placeholder="John Doe" 
+                    className="glass-input w-full p-4 pl-11 rounded-xl focus:border-primary focus:outline-none text-sm transition-colors text-textMain placeholder-textMuted caret-primary"
+                    placeholder="Tu Nombre" 
                   />
                 </div>
               </div>
@@ -91,13 +90,13 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, onLogin, onRegiste
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-textMuted uppercase tracking-widest">{t.email}</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-textMuted" />
                 <input 
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required 
-                  className={`w-full p-4 pl-11 border rounded-xl focus:border-primary focus:outline-none text-sm transition-colors ${theme === 'light' ? 'bg-gray-50 border-gray-200 text-black' : 'bg-background border-white/10 text-white'}`}
+                  className="glass-input w-full p-4 pl-11 rounded-xl focus:border-primary focus:outline-none text-sm transition-colors text-textMain placeholder-textMuted caret-primary"
                   placeholder="name@example.com" 
                 />
               </div>
@@ -106,13 +105,13 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, onLogin, onRegiste
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-textMuted uppercase tracking-widest">{t.password}</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-textMuted" />
                 <input 
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required 
-                  className={`w-full p-4 pl-11 border rounded-xl focus:border-primary focus:outline-none text-sm transition-colors ${theme === 'light' ? 'bg-gray-50 border-gray-200 text-black' : 'bg-background border-white/10 text-white'}`}
+                  className="glass-input w-full p-4 pl-11 rounded-xl focus:border-primary focus:outline-none text-sm transition-colors text-textMain placeholder-textMuted caret-primary"
                   placeholder="••••••••" 
                 />
               </div>
@@ -121,7 +120,7 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, onLogin, onRegiste
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-4 mt-2 rounded-xl font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${theme === 'light' ? 'bg-black text-white hover:bg-gray-800' : 'bg-white text-black hover:bg-gray-200'}`}
+              className="w-full py-4 mt-2 rounded-xl font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 bg-textMain text-background hover:scale-[1.02] shadow-lg"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {isLogin ? t.login : t.signup}
@@ -131,7 +130,7 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, onLogin, onRegiste
           <div className="mt-8 text-center">
             <button
               onClick={() => { setIsLogin(!isLogin); setError(null); }}
-              className="text-xs text-textMuted hover:text-primary transition-colors uppercase tracking-widest font-bold"
+              className="text-xs text-textMuted hover:text-textMain transition-colors uppercase tracking-widest font-bold"
             >
               {isLogin ? t.dontHaveAccount : t.haveAccount} <span className="text-primary underline decoration-2 underline-offset-4">{isLogin ? t.signup : t.login}</span>
             </button>

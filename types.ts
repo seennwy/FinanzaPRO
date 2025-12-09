@@ -43,6 +43,8 @@ export type Language = 'es' | 'en';
 export type Currency = '€' | '$' | '£';
 export type Theme = 'dark' | 'light' | 'system';
 
+export type DashboardRange = 'annual' | 'last30Days' | 'last15Days' | 'lastPaycheck';
+
 export interface RecurringItem {
   id: string;
   label: string;

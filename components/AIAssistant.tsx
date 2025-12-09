@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { getComplexFinancialAdvice, getQuickAnalysis, searchFinancialInfo, generateGoalImage } from '../services/geminiService';
 import { Transaction, AspectRatio, Language, Currency } from '../types';
@@ -31,7 +32,7 @@ export const AIAssistant: React.FC<Props> = ({ transactions, lang, currency, t }
   const handleQuickAnalysis = async () => {
     setLoading(true);
     setResult(null);
-    const summary = `${t.income}: ${currency}${totalIncome}, ${t.expenses}: ${currency}${totalExpense}, ${t.balance}: ${currency}${balance}. ${t.category}: ${[...new Set(transactions.map(t => t.category))].join(', ')}`;
+    const summary = `${t.income}: ${totalIncome} ${currency}, ${t.expenses}: ${totalExpense} ${currency}, ${t.balance}: ${balance} ${currency}. ${t.category}: ${[...new Set(transactions.map(t => t.category))].join(', ')}`;
     
     try {
       const analysis = await getQuickAnalysis(summary, lang);
@@ -45,7 +46,7 @@ export const AIAssistant: React.FC<Props> = ({ transactions, lang, currency, t }
     if (!query) return;
     setLoading(true);
     setResult(null);
-    const context = `User Balance: ${currency}${balance}. Recent History: ${transactions.slice(0, 5).map(t => `${t.description} (${currency}${t.amount})`).join(', ')}.`;
+    const context = `User Balance: ${balance} ${currency}. Recent History: ${transactions.slice(0, 5).map(t => `${t.description} (${t.amount} ${currency})`).join(', ')}.`;
     
     try {
       const advice = await getComplexFinancialAdvice(query, context, lang);
@@ -141,7 +142,7 @@ export const AIAssistant: React.FC<Props> = ({ transactions, lang, currency, t }
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t.placeholderAdvice}
-                className="flex-1 p-4 bg-background border border-white/10 rounded-xl text-textMain placeholder-textMuted focus:outline-none focus:border-primary/50 text-sm transition-colors duration-300"
+                className="flex-1 glass-input p-4 rounded-xl text-textMain placeholder-textMuted focus:outline-none focus:border-primary/50 text-sm transition-colors duration-300"
               />
               <button
                 onClick={handleAdvisor}
@@ -164,7 +165,7 @@ export const AIAssistant: React.FC<Props> = ({ transactions, lang, currency, t }
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t.placeholderSearch}
-                className="flex-1 p-4 bg-background border border-white/10 rounded-xl text-textMain placeholder-textMuted focus:outline-none focus:border-primary/50 text-sm transition-colors duration-300"
+                className="flex-1 glass-input p-4 rounded-xl text-textMain placeholder-textMuted focus:outline-none focus:border-primary/50 text-sm transition-colors duration-300"
               />
               <button
                 onClick={handleSearch}
@@ -187,16 +188,16 @@ export const AIAssistant: React.FC<Props> = ({ transactions, lang, currency, t }
                 value={imagePrompt}
                 onChange={(e) => setImagePrompt(e.target.value)}
                 placeholder={t.placeholderImage}
-                className="flex-1 p-4 bg-background border border-white/10 rounded-xl text-textMain placeholder-textMuted focus:outline-none focus:border-primary/50 text-sm transition-colors duration-300"
+                className="flex-1 glass-input p-4 rounded-xl text-textMain placeholder-textMuted focus:outline-none focus:border-primary/50 text-sm transition-colors duration-300"
               />
               <div className="flex flex-wrap gap-2 items-center justify-between">
                 <select 
                   value={aspectRatio} 
                   onChange={(e) => setAspectRatio(e.target.value as AspectRatio)}
-                  className="p-2 bg-background border border-white/10 rounded-lg text-xs text-textMuted focus:outline-none transition-colors duration-300"
+                  className="glass-input p-2 rounded-lg text-xs text-textMuted focus:outline-none transition-colors duration-300"
                 >
                   {Object.entries(AspectRatio).map(([key, value]) => (
-                    <option key={value} value={value}>{key} ({value})</option>
+                    <option key={value} value={value} className="bg-surface text-textMain">{key} ({value})</option>
                   ))}
                 </select>
                 <button

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es" class="dark">
   <head>
@@ -126,15 +127,31 @@
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
       }
 
+      /* Force overrides for inputs to prevent Tailwind Forms plugin from setting white background */
       .glass-input {
-        background: var(--input-bg);
-        border: 1px solid var(--input-border);
-        color: var(--text-main);
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--input-border) !important;
+        color: var(--text-main) !important;
       }
       
       .glass-input:focus {
-        border-color: #00E396;
+        border-color: #00E396 !important;
         box-shadow: 0 0 0 1px rgba(0, 227, 150, 0.3);
+      }
+
+      /* Autofill Fix: Forces the background to match theme even when browser autofills */
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover, 
+      input:-webkit-autofill:focus, 
+      input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 30px var(--input-bg) inset !important;
+          -webkit-text-fill-color: var(--text-main) !important;
+          transition: background-color 5000s ease-in-out 0s;
+      }
+      
+      /* Date Input Fix for Dark Mode: Inverts the calendar icon so it is visible on dark bg */
+      .dark ::-webkit-calendar-picker-indicator {
+        filter: invert(1);
       }
 
       /* Scrollbar */

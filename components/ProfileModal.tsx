@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { X, User as UserIcon, Pencil, Save, Loader2, Settings } from 'lucide-react';
 import { User, Theme } from '../types';
@@ -67,10 +68,10 @@ export const ProfileModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className={`glass-strong w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl animate-scale-in border border-white/20`}>
+      <div className={`glass-strong w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl animate-scale-in border border-gray-200 dark:border-white/20`}>
         
         {/* Header */}
-        <div className={`p-6 border-b border-white/10 flex justify-between items-center bg-surfaceHighlight`}>
+        <div className={`p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-surfaceHighlight`}>
           <h3 className={`text-sm font-bold uppercase tracking-widest text-textMain`}>
             Perfil
           </h3>
@@ -112,7 +113,7 @@ export const ProfileModal: React.FC<Props> = ({
                   type="text" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className={`glass-input w-full p-4 pl-11 rounded-xl outline-none focus:ring-1 focus:ring-primary/50 text-sm transition-all text-textMain`}
+                  className={`glass-input w-full p-4 pl-11 rounded-xl outline-none focus:ring-1 focus:ring-primary/50 text-sm transition-all text-textMain caret-primary`}
                 />
               </div>
             </div>
@@ -127,13 +128,13 @@ export const ProfileModal: React.FC<Props> = ({
             </button>
           </form>
           
-          <div className="mt-8 pt-6 border-t border-dashed border-white/10 flex flex-col gap-3">
+          <div className="mt-8 pt-6 border-t border-dashed border-gray-200 dark:border-white/10 flex flex-col gap-3">
              <button
                onClick={() => {
                  onClose();
                  onOpenSettings();
                }}
-               className="w-full py-3 text-textMain border border-white/10 hover:bg-surfaceHighlight rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-colors"
+               className="w-full py-3 text-textMain border border-gray-200 dark:border-white/10 hover:bg-surfaceHighlight rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-colors"
              >
                <Settings className="w-4 h-4" /> {t.settings}
              </button>

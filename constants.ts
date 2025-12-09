@@ -11,6 +11,7 @@ export const CATEGORIES = [
   'Regalos',
   'Salario',
   'Inversiones',
+  'Ahorro',
   'Otros'
 ];
 
@@ -30,6 +31,7 @@ export const EXPENSE_CATEGORIES = [
   'Suscripciones',
   'Regalos',
   'Inversiones',
+  'Ahorro',
   'Otros'
 ];
 
@@ -52,10 +54,9 @@ export const COLORS = [
 export const RECURRING_ITEMS = [
   { id: 'salary', label: 'Salario Mensual', type: 'income', category: 'Salario', defaultAmount: 2500, icon: '💰' },
   { id: 'rent', label: 'Alquiler / Hipoteca', type: 'expense', category: 'Vivienda', defaultAmount: 800, icon: '🏠' },
-  { id: 'groceries', label: 'Supermercado (Est. Mensual)', type: 'expense', category: 'Alimentación', defaultAmount: 300, icon: '🛒' },
   { id: 'utilities', label: 'Internet / Luz / Agua', type: 'expense', category: 'Vivienda', defaultAmount: 100, icon: '💡' },
-  { id: 'streaming', label: 'Netflix / Spotify', type: 'expense', category: 'Suscripciones', defaultAmount: 15, icon: '🎬' },
-  { id: 'gym', label: 'Gimnasio', type: 'expense', category: 'Salud', defaultAmount: 40, icon: '💪' },
+  { id: 'streaming', label: 'Suscripciones', type: 'expense', category: 'Suscripciones', defaultAmount: 15, icon: '🎬' },
+  { id: 'savings', label: 'Ahorro Mensual', type: 'expense', category: 'Ahorro', defaultAmount: 200, icon: '💸' },
 ];
 
 export const TRANSLATIONS = {
@@ -70,6 +71,15 @@ export const TRANSLATIONS = {
     noActivity: "No hay actividad registrada.",
     breakdown: "Desglose de Gastos",
     monthlyPerformance: "Rendimiento Mensual",
+    savingsEvolution: "Evolución del Ahorro",
+    totalSavings: "Ahorro Total",
+    investmentPerformance: "Rendimiento Inversiones",
+    netInvestment: "Neto Inversiones",
+    invested: "Invertido",
+    returned: "Retorno",
+    viewGeneral: "General",
+    viewSavings: "Ahorro",
+    viewInvestments: "Inversiones",
     noData: "Sin datos",
     newEntry: "Nueva Entrada",
     save: "Guardar",
@@ -156,6 +166,13 @@ export const TRANSLATIONS = {
     startDate: "Fecha Inicio",
     endDate: "Fecha Fin",
     apply: "Aplicar",
+    // Dashboard Ranges
+    dashboardConfig: "Vista del Dashboard",
+    rangeAnnual: "Anual",
+    range15Days: "Últimos 15 días",
+    range30Days: "Últimos 30 días",
+    rangePaycheck: "Última Nómina",
+    noRecurringData: "No tenemos datos registrados",
   },
   en: {
     dashboard: "Monitor",
@@ -168,6 +185,15 @@ export const TRANSLATIONS = {
     noActivity: "No activity recorded.",
     breakdown: "Expense Breakdown",
     monthlyPerformance: "Monthly Performance",
+    savingsEvolution: "Savings Evolution",
+    totalSavings: "Total Savings",
+    investmentPerformance: "Investment Performance",
+    netInvestment: "Net Investments",
+    invested: "Invested",
+    returned: "Returned",
+    viewGeneral: "General",
+    viewSavings: "Savings",
+    viewInvestments: "Investments",
     noData: "No data",
     newEntry: "New Entry",
     save: "Save",
@@ -254,5 +280,12 @@ export const TRANSLATIONS = {
     startDate: "Start Date",
     endDate: "End Date",
     apply: "Apply",
+    // Dashboard Ranges
+    dashboardConfig: "Dashboard View",
+    rangeAnnual: "Annual",
+    range15Days: "Last 15 Days",
+    range30Days: "Last 30 Days",
+    rangePaycheck: "Last Paycheck",
+    noRecurringData: "No data recorded",
   }
 };

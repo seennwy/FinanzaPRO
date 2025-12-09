@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Transaction, Language, Currency, Theme, User, RecurringItem } from './types';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Transaction, Language, Currency, Theme, User, RecurringItem, DashboardRange } from './types';
 import { INCOME_CATEGORIES as DEFAULT_INCOME, EXPENSE_CATEGORIES as DEFAULT_EXPENSE, RECURRING_ITEMS as DEFAULT_RECURRING, TRANSLATIONS } from './constants';
 import { TransactionList } from './components/TransactionList';
 import { Analytics } from './components/Analytics';
@@ -22,7 +22,8 @@ export default function App() {
   const [language, setLanguage] = useState<Language>('es');
   const [currency, setCurrency] = useState<Currency>('€');
   const [theme, setTheme] = useState<Theme>('system'); // Default to system
-  
+  const [dashboardRange, setDashboardRange] = useState<DashboardRange>('last30Days'); // Default range
+
   // Dynamic Configuration State
   const [incomeCategories, setIncomeCategories] = useState<string[]>(DEFAULT_INCOME);
   const [expenseCategories, setExpenseCategories] = useState<string[]>(DEFAULT_EXPENSE);
@@ -119,31 +120,127 @@ export default function App() {
     db.saveTransactions(newTransactions);
   };
 
-  // Derived state
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-  const balance = totalIncome - totalExpense;
+  // --- DASHBOARD METRICS LOGIC ---
+  const dashboardMetrics = useMemo(() => {
+    const now = new Date();
+    // Normalize to end of day
+    now.setHours(23, 59, 59, 999);
+    
+    let rangeStart = new Date();
+    let prevRangeStart = new Date();
+    let prevRangeEnd = new Date(); // The end of the previous period is the start of current (exclusive logic usually, but here comparison)
 
-  // Performance Logic
-  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome) * 100 : 0;
-  
-  const getPerformanceData = () => {
-    if (savingsRate > 70) return { emoji: '🚀', label: 'Excelente', color: 'text-primary' };
-    if (savingsRate >= 50) return { emoji: '🔥', label: 'Genial', color: 'text-[#FEB019]' }; // Gold
-    if (savingsRate >= 20) return { emoji: '👍', label: 'Bien', color: 'text-accent' };
+    switch (dashboardRange) {
+      case 'annual':
+        // Current: This Year
+        rangeStart = new Date(now.getFullYear(), 0, 1);
+        // Previous: Last Year
+        prevRangeStart = new Date(now.getFullYear() - 1, 0, 1);
+        prevRangeEnd = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+        break;
+      
+      case 'last15Days':
+        rangeStart = new Date(now);
+        rangeStart.setDate(now.getDate() - 15);
+        
+        prevRangeEnd = new Date(rangeStart);
+        prevRangeEnd.setDate(prevRangeEnd.getDate() - 1);
+        
+        prevRangeStart = new Date(prevRangeEnd);
+        prevRangeStart.setDate(prevRangeStart.getDate() - 15);
+        break;
+        
+      case 'last30Days':
+        rangeStart = new Date(now);
+        rangeStart.setDate(now.getDate() - 30);
+        
+        prevRangeEnd = new Date(rangeStart);
+        prevRangeEnd.setDate(prevRangeEnd.getDate() - 1);
+        
+        prevRangeStart = new Date(prevRangeEnd);
+        prevRangeStart.setDate(prevRangeStart.getDate() - 30);
+        break;
+
+      case 'lastPaycheck':
+        // Find latest income that matches 'salary' logic:
+        // Category is 'Salario' OR Description contains 'nomina', 'sueldo', 'salario'
+        const salaryKeywords = ['nomina', 'nómina', 'sueldo', 'salario'];
+        
+        const sortedIncomes = transactions
+           .filter(t => {
+             if (t.type !== 'income') return false;
+             const desc = t.description.toLowerCase();
+             const cat = t.category.toLowerCase();
+             return cat === 'salario' || salaryKeywords.some(k => desc.includes(k));
+           })
+           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        
+        if (sortedIncomes.length > 0) {
+           rangeStart = new Date(sortedIncomes[0].date);
+           if (sortedIncomes.length > 1) {
+              prevRangeStart = new Date(sortedIncomes[1].date);
+              prevRangeEnd = new Date(rangeStart);
+              prevRangeEnd.setDate(prevRangeEnd.getDate() - 1); // Avoid overlap
+           } else {
+              // Only 1 paycheck found, fallback previous to 30 days before that
+              prevRangeEnd = new Date(rangeStart);
+              prevRangeEnd.setDate(prevRangeEnd.getDate() - 1);
+              prevRangeStart = new Date(prevRangeEnd);
+              prevRangeStart.setDate(prevRangeStart.getDate() - 30);
+           }
+        } else {
+           // Fallback if no paycheck data: Last 30 Days
+           rangeStart = new Date(now);
+           rangeStart.setDate(now.getDate() - 30);
+           prevRangeEnd = new Date(rangeStart);
+           prevRangeEnd.setDate(prevRangeEnd.getDate() - 1);
+           prevRangeStart = new Date(prevRangeEnd);
+           prevRangeStart.setDate(prevRangeStart.getDate() - 30);
+        }
+        break;
+    }
+
+    // Filter Current Period
+    const currentTx = transactions.filter(t => {
+       const d = new Date(t.date);
+       return d >= rangeStart && d <= now;
+    });
+
+    const currentIncome = currentTx.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const currentExpense = currentTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    
+    const balance = currentIncome - currentExpense;
+    
+    // Performance logic (Savings Rate) based on CURRENT period
+    const savingsRate = currentIncome > 0 ? ((currentIncome - currentExpense) / currentIncome) * 100 : 0;
+
+    return {
+       currentIncome,
+       currentExpense,
+       balance,
+       savingsRate
+    };
+
+  }, [transactions, dashboardRange]);
+
+  const getPerformanceData = (rate: number) => {
+    if (rate > 70) return { emoji: '🚀', label: 'Excelente', color: 'text-primary' };
+    if (rate >= 50) return { emoji: '🔥', label: 'Genial', color: 'text-[#FEB019]' }; // Gold
+    if (rate >= 20) return { emoji: '👍', label: 'Bien', color: 'text-accent' };
     return { emoji: '😐', label: 'Mejorable', color: 'text-textMuted' };
   };
 
-  const performance = getPerformanceData();
+  const performance = getPerformanceData(dashboardMetrics.savingsRate);
 
   // Format Helper
   const formatNumber = (num: number) => {
     return num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
   
-  const balanceFormatted = formatNumber(balance);
+  const balanceFormatted = formatNumber(dashboardMetrics.balance);
   const [balanceInt, balanceDec] = balanceFormatted.split(',');
 
+  // --- HANDLERS ---
   const handleAddTransaction = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDesc || !newAmount || !newDate) return;
@@ -228,10 +325,10 @@ export default function App() {
     }
   };
 
-  const handleOnboardingComplete = (newUser: User, customRecurring: RecurringItem[], finalExpenseCategories: string[]) => {
+  const handleOnboardingComplete = (newUser: User, finalRecurring: RecurringItem[], finalExpenseCategories: string[]) => {
     setUser(newUser);
-    // Update local state with any custom items created during onboarding
-    setRecurringItems(prev => [...prev, ...customRecurring]);
+    // Overwrite recurring items with the ones ACTIVE from onboarding
+    setRecurringItems(finalRecurring);
     // Replace expense categories with the ones finalized in onboarding
     setExpenseCategories(finalExpenseCategories);
   };
@@ -335,14 +432,15 @@ export default function App() {
               </div>
               <p className="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-2">{t.balance}</p>
               <h2 className={`text-4xl md:text-5xl font-bold font-mono tracking-tighter text-textMain`}>
-                {currency}{balanceInt}
+                {balanceInt}
                 <span className="text-xl text-textMuted font-normal">,{balanceDec}</span>
+                <span className="text-2xl ml-2">{currency}</span>
               </h2>
               <div className="mt-4 flex items-center gap-2">
                  <div className={`h-1.5 flex-1 rounded-full overflow-hidden bg-black/10 dark:bg-black/20`}>
                     <div 
                       className={`h-full rounded-full bg-current shadow-[0_0_10px_currentColor] transition-all duration-1000 text-white`}
-                      style={{ width: `${Math.min(savingsRate, 100)}%` }}
+                      style={{ width: `${Math.min(dashboardMetrics.savingsRate, 100)}%` }}
                     ></div>
                  </div>
                  <span className={`text-xs font-bold ${performance.color}`}>{performance.label}</span>
@@ -350,24 +448,22 @@ export default function App() {
             </div>
 
             {/* Income Card */}
-            <div className={`p-5 rounded-3xl glass-card flex flex-col justify-between group`}>
+            <div className={`p-5 rounded-3xl glass-card flex flex-col justify-center group`}>
                <div>
                 <p className="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-1">{t.income}</p>
-                <p className="text-xl font-bold font-mono text-primary drop-shadow-[0_0_8px_rgba(0,227,150,0.5)]">+{currency}{formatNumber(totalIncome)}</p>
-               </div>
-               <div className="mt-2 text-xs text-textMuted flex items-center gap-1 group-hover:text-textMain transition-colors">
-                 <ArrowUp className="w-3 h-3 text-primary" /> {t.vsLast}
+                <p className="text-xl font-bold font-mono text-primary drop-shadow-[0_0_8px_rgba(0,227,150,0.5)]">
+                  +{formatNumber(dashboardMetrics.currentIncome)} {currency}
+                </p>
                </div>
             </div>
 
             {/* Expenses Card */}
-            <div className={`p-5 rounded-3xl glass-card flex flex-col justify-between group`}>
+            <div className={`p-5 rounded-3xl glass-card flex flex-col justify-center group`}>
                <div>
                 <p className="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-1">{t.expenses}</p>
-                <p className="text-xl font-bold font-mono text-danger drop-shadow-[0_0_8px_rgba(255,69,96,0.5)]">-{currency}{formatNumber(totalExpense)}</p>
-               </div>
-               <div className="mt-2 text-xs text-textMuted flex items-center gap-1 group-hover:text-textMain transition-colors">
-                 <span className="text-textMuted">{Math.round(100 - savingsRate)}% used</span>
+                <p className="text-xl font-bold font-mono text-danger drop-shadow-[0_0_8px_rgba(255,69,96,0.5)]">
+                  - {formatNumber(dashboardMetrics.currentExpense)} {currency}
+                </p>
                </div>
             </div>
           </div>
@@ -435,6 +531,8 @@ export default function App() {
         setLanguage={setLanguage}
         currency={currency}
         setCurrency={setCurrency}
+        dashboardRange={dashboardRange}
+        setDashboardRange={setDashboardRange}
         onExport={handleExport}
         onImport={handleImport}
         
@@ -490,16 +588,16 @@ export default function App() {
               <div>
                 <label className="block text-[10px] font-bold text-textMuted uppercase tracking-widest mb-2">{t.amount}</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-textMuted">{currency}</span>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={newAmount}
                     onChange={(e) => setNewAmount(e.target.value)}
-                    className={`glass-input w-full p-4 pl-8 rounded-xl font-mono text-lg outline-none focus:ring-1 focus:ring-primary/50 transition-all text-textMain placeholder-textMuted/50`}
+                    className={`glass-input w-full p-4 pl-4 pr-12 rounded-xl font-mono text-lg outline-none focus:ring-1 focus:ring-primary/50 transition-all text-textMain placeholder-textMuted/50`}
                     placeholder="0.00"
                   />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-textMuted">{currency}</span>
                 </div>
               </div>
 

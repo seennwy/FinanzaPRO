@@ -134,7 +134,6 @@ export const TransactionList: React.FC<Props> = ({ transactions, onDelete, curre
                   <p className="font-medium text-textMain text-sm truncate group-hover:text-primary transition-colors">{t.description}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[10px] text-textMuted truncate">{t.date}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surfaceHighlight text-textMuted">{t.category}</span>
                   </div>
                 </div>
               </div>
@@ -142,7 +141,7 @@ export const TransactionList: React.FC<Props> = ({ transactions, onDelete, curre
               {/* Right Side: Amount + Delete Action */}
               <div className="flex items-center gap-4 shrink-0">
                 <span className={`text-sm font-bold font-mono whitespace-nowrap drop-shadow-md ${t.type === 'income' ? 'text-primary' : 'text-textMain'}`}>
-                  {t.type === 'income' ? '+' : '-'}{currency}{Math.abs(t.amount).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {t.type === 'income' ? '+' : '-'} {Math.abs(t.amount).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                 </span>
                 <button 
                   onClick={() => onDelete(t.id)}

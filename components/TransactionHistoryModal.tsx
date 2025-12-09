@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Transaction, Currency } from '../types';
 import { ArrowLeft, ArrowUp, ArrowDown, Search } from 'lucide-react';
@@ -147,8 +148,7 @@ export const TransactionHistoryModal: React.FC<Props> = ({ isOpen, onClose, tran
 
                   {/* Amount */}
                   <span className={`font-mono font-bold text-sm ${t.type === 'income' ? 'text-primary' : 'text-textMain'}`}>
-                    {t.type === 'income' ? '+' : ''}
-                    {Math.abs(t.amount).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                    {t.type === 'income' ? '+' : '-'} {Math.abs(t.amount).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                   </span>
                 </div>
               ))}
@@ -157,9 +157,9 @@ export const TransactionHistoryModal: React.FC<Props> = ({ isOpen, onClose, tran
             {/* Daily Total (Optional, nice touch) */}
             <div className="flex justify-end mt-2 mr-2">
               <span className="text-[10px] text-textMuted uppercase tracking-widest">
-                Total día: {currency}
+                Total día: 
                 {txs.reduce((acc, curr) => curr.type === 'income' ? acc + curr.amount : acc - curr.amount, 0)
-                   .toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                   .toLocaleString('de-DE', { minimumFractionDigits: 2 })} {currency}
               </span>
             </div>
           </div>

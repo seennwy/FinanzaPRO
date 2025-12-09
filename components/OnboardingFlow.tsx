@@ -22,7 +22,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
 
   // Custom Recurring State
   const [recurringList, setRecurringList] = useState<RecurringItem[]>(initialRecurringItems);
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set(['salary', 'rent', 'groceries']));
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set([])); // Start empty to respect "I choose nothing"
   const [customAmounts, setCustomAmounts] = useState<Record<string, number>>({});
   const [customDays, setCustomDays] = useState<Record<string, number>>({});
   
@@ -70,18 +70,27 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
       }, 800);
 
       const init = async () => {
-        const itemsToCreate = recurringList.filter(item => selectedItems.has(item.id)).map(item => ({
+        // Calculate the FINAL list of active recurring items based on selection
+        const selectedList = recurringList.filter(item => selectedItems.has(item.id));
+        
+        // Map them to include any custom values set by the user (amount, day)
+        const finalRecurringItemsForApp = selectedList.map(item => ({
           ...item,
-          amount: customAmounts[item.id] || item.defaultAmount,
-          dayOfMonth: customDays[item.id] || 1 
+          defaultAmount: customAmounts[item.id] !== undefined ? customAmounts[item.id] : item.defaultAmount,
+          dayOfMonth: customDays[item.id] !== undefined ? customDays[item.id] : (item.dayOfMonth || 1)
         }));
         
-        const user = await db.initSingleUser(name, avatar, itemsToCreate);
-        // Extract newly added custom items
-        const newRecurring = recurringList.filter(i => i.id.startsWith('custom_'));
+        // Prepare list for DB (which historically used 'amount' property)
+        const itemsForDB = finalRecurringItemsForApp.map(item => ({
+            ...item,
+            amount: item.defaultAmount // Map defaultAmount to amount for DB generator
+        }));
         
-        // Pass the FINAL list of categories to override/update App state
-        onComplete(user, newRecurring, expenseCats);
+        // Initialize DB with transactions
+        const user = await db.initSingleUser(name, avatar, itemsForDB);
+        
+        // Pass the COMPLETE active list to App to REPLACE the defaults
+        onComplete(user, finalRecurringItemsForApp, expenseCats);
       };
       init();
 
@@ -211,7 +220,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
             value={name} 
             onChange={(e) => setName(e.target.value)} 
             placeholder={t.obNamePlaceholder}
-            className="bg-transparent border-b-2 border-white/20 text-4xl py-4 focus:outline-none focus:border-primary w-full placeholder-textMuted font-light transition-colors"
+            className="!bg-transparent border-b-2 border-gray-200 dark:border-white/20 text-4xl py-4 focus:outline-none focus:border-primary w-full placeholder-textMuted font-light transition-colors text-textMain caret-primary"
           />
           <div className="mt-12 flex justify-end">
             <button 
@@ -282,7 +291,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
               onChange={(e) => setNewCatInput(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
               placeholder="Nueva categoría..."
-              className="flex-1 glass-input rounded-xl px-4 py-3 text-sm focus:border-primary"
+              className="flex-1 glass-input rounded-xl px-4 py-3 text-sm focus:border-primary text-textMain"
             />
             <button 
               onClick={handleAddCategory}
@@ -295,7 +304,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
           <div className="flex-1 overflow-y-auto custom-scrollbar content-start pb-4">
             <div className="flex flex-wrap gap-3">
               {expenseCats.map((cat) => (
-                <div key={cat} className="bg-surfaceHighlight px-4 py-2 rounded-xl border border-white/5 flex items-center gap-3 animate-scale-in">
+                <div key={cat} className="bg-surfaceHighlight px-4 py-2 rounded-xl border border-gray-200 dark:border-white/5 flex items-center gap-3 animate-scale-in">
                   <span className="font-bold text-sm text-textMain">{cat}</span>
                   <button 
                     onClick={() => handleRemoveCategory(cat)}
@@ -313,7 +322,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
             </div>
           </div>
 
-          <div className="pt-6 border-t border-white/10 flex justify-end mt-4">
+          <div className="pt-6 border-t border-gray-200 dark:border-white/10 flex justify-end mt-4">
             <button 
               onClick={handleNext} 
               className="w-full py-4 bg-textMain text-background rounded-xl font-bold uppercase tracking-widest hover:scale-[1.02] transition-all shadow-lg"
@@ -340,7 +349,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
             </div>
             <button 
               onClick={() => setIsAddingCustom(true)}
-              className="bg-surfaceHighlight p-3 rounded-full hover:bg-white/10 text-primary transition-all shadow-lg hover:shadow-primary/20"
+              className="bg-surfaceHighlight p-3 rounded-full hover:bg-white/10 dark:hover:bg-white/10 text-primary transition-all shadow-lg hover:shadow-primary/20"
             >
               <Plus className="w-6 h-6" />
             </button>
@@ -348,23 +357,23 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
 
           {/* New Item Form (Inline, simple) */}
           {isAddingCustom && (
-            <div className="mb-4 p-5 bg-surfaceHighlight/50 backdrop-blur-md rounded-3xl border border-white/10 animate-slide-in-right">
+            <div className="mb-4 p-5 bg-surfaceHighlight/50 backdrop-blur-md rounded-3xl border border-gray-200 dark:border-white/10 animate-slide-in-right">
                <div className="flex justify-between items-center mb-4">
-                 <h3 className="text-xs font-bold uppercase tracking-widest">Crear Personalizado</h3>
-                 <button onClick={() => setIsAddingCustom(false)}><X className="w-4 h-4 text-textMuted hover:text-white" /></button>
+                 <h3 className="text-xs font-bold uppercase tracking-widest text-textMain">Crear Personalizado</h3>
+                 <button onClick={() => setIsAddingCustom(false)}><X className="w-4 h-4 text-textMuted hover:text-textMain" /></button>
                </div>
                <div className="space-y-4">
                  <input 
                    type="text" 
                    placeholder="Nombre (ej: Gimnasio)" 
-                   className="glass-input w-full p-3 rounded-xl text-sm"
+                   className="glass-input w-full p-3 rounded-xl text-sm text-textMain"
                    value={newItemName}
                    onChange={e => setNewItemName(e.target.value)}
                    autoFocus
                  />
                  <div className="grid grid-cols-2 gap-3">
                     <select 
-                        className="glass-input p-3 rounded-xl text-sm w-full appearance-none"
+                        className="glass-input p-3 rounded-xl text-sm w-full appearance-none text-textMain"
                         value={newItemType}
                         onChange={(e) => setNewItemType(e.target.value as any)}
                     >
@@ -372,7 +381,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
                         <option value="income">Ingreso</option>
                     </select>
                     <select 
-                        className="glass-input p-3 rounded-xl text-sm w-full appearance-none"
+                        className="glass-input p-3 rounded-xl text-sm w-full appearance-none text-textMain"
                         value={newItemCategory}
                         onChange={(e) => setNewItemCategory(e.target.value)}
                     >
@@ -398,11 +407,11 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
                 <button 
                   key={item.id} 
                   onClick={() => handleItemClick(item.id)}
-                  className={`w-full text-left p-4 rounded-3xl border transition-all duration-300 group ${isSelected ? 'glass bg-surfaceHighlight border-primary/30 shadow-[0_4px_20px_rgba(0,0,0,0.2)]' : 'bg-transparent border-white/5 hover:border-white/20 hover:bg-white/5'}`}
+                  className={`w-full text-left p-4 rounded-3xl border transition-all duration-300 group ${isSelected ? 'glass bg-surfaceHighlight border-primary/30 shadow-[0_4px_20px_rgba(0,0,0,0.2)]' : 'bg-transparent border-gray-200 dark:border-white/5 hover:border-primary/50 hover:bg-surfaceHighlight'}`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-all ${isSelected ? 'bg-primary/10 scale-105' : 'bg-white/5 grayscale opacity-50'}`}>
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-all ${isSelected ? 'bg-primary/10 scale-105' : 'bg-gray-100 dark:bg-white/5 grayscale opacity-50'}`}>
                          {item.icon}
                       </div>
                       
@@ -414,9 +423,9 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
                         {isSelected && (
                            <div className="mt-1 flex items-center gap-2">
                              <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                               €{(customAmounts[item.id] ?? item.defaultAmount).toLocaleString()}
+                               {(customAmounts[item.id] ?? item.defaultAmount).toLocaleString()} €
                              </span>
-                             <span className="text-[10px] font-mono text-textMuted bg-white/5 px-1.5 py-0.5 rounded">
+                             <span className="text-[10px] font-mono text-textMuted bg-gray-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
                                Día {customDays[item.id] ?? 1}
                              </span>
                            </div>
@@ -424,7 +433,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
                       </div>
                     </div>
 
-                    <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary text-black' : 'border-white/10 text-transparent'}`}>
+                    <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary text-black' : 'border-gray-200 dark:border-white/10 text-transparent'}`}>
                       <Check className="w-3.5 h-3.5" strokeWidth={3} />
                     </div>
                   </div>
@@ -433,7 +442,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
             })}
           </div>
 
-          <div className="pt-6 border-t border-white/10 flex justify-end">
+          <div className="pt-6 border-t border-gray-200 dark:border-white/10 flex justify-end">
             <button 
               onClick={handleNext} 
               className="w-full py-4 bg-textMain text-background rounded-xl font-bold uppercase tracking-widest hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]"
@@ -446,13 +455,13 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
         {/* Item Configuration Modal/Overlay */}
         {editingItemId && editingItem && (
           <div className="absolute inset-0 z-20 flex items-center justify-center p-6 bg-black/60 backdrop-blur-md rounded-[2.5rem]">
-            <div className="w-full bg-surface border border-white/10 rounded-3xl p-6 shadow-2xl animate-scale-in">
+            <div className="w-full bg-surface border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl animate-scale-in">
               <div className="flex items-center gap-4 mb-8">
                  <div className="w-14 h-14 rounded-2xl bg-surfaceHighlight flex items-center justify-center text-3xl shadow-inner">
                     {editingItem.icon}
                  </div>
                  <div>
-                    <h3 className="text-lg font-bold text-white">{editingItem.label}</h3>
+                    <h3 className="text-lg font-bold text-textMain">{editingItem.label}</h3>
                     <p className="text-xs text-textMuted uppercase tracking-widest">{editingItem.category}</p>
                  </div>
               </div>
@@ -461,15 +470,15 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
                  <div>
                     <label className="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-2 block">Monto Mensual</label>
                     <div className="relative">
-                       <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-primary" />
                        <input 
                          type="number"
                          autoFocus 
                          value={tempAmount}
                          onChange={(e) => setTempAmount(e.target.value)}
-                         className="w-full bg-surfaceHighlight border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-3xl font-mono font-bold text-white focus:outline-none focus:border-primary/50 transition-colors placeholder-white/10"
+                         className="w-full bg-surfaceHighlight border border-gray-200 dark:border-white/5 rounded-2xl py-4 pl-4 pr-12 text-3xl font-mono font-bold text-textMain focus:outline-none focus:border-primary/50 transition-colors placeholder-textMuted/30"
                          placeholder="0.00"
                        />
+                       <DollarSign className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 text-primary" />
                     </div>
                  </div>
 
@@ -482,7 +491,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
                          min="1" max="31"
                          value={tempDay}
                          onChange={(e) => setTempDay(e.target.value)}
-                         className="w-full bg-surfaceHighlight border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-lg font-bold text-white focus:outline-none focus:border-primary/50 transition-colors"
+                         className="w-full bg-surfaceHighlight border border-gray-200 dark:border-white/5 rounded-2xl py-4 pl-12 pr-4 text-lg font-bold text-textMain focus:outline-none focus:border-primary/50 transition-colors"
                          placeholder="1"
                        />
                     </div>
@@ -515,7 +524,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
     <div className="min-h-screen text-textMain flex flex-col items-center justify-center p-6 relative">
        <div className="glass-card p-12 rounded-[3rem] flex flex-col items-center space-y-8 animate-scale-in">
          <div className="relative">
-           <div className="w-20 h-20 border-4 border-white/10 border-t-primary rounded-full animate-spin"></div>
+           <div className="w-20 h-20 border-4 border-gray-200 dark:border-white/10 border-t-primary rounded-full animate-spin"></div>
            <div className="absolute inset-0 flex items-center justify-center">
              <Activity className="w-8 h-8 text-primary animate-pulse" />
            </div>
