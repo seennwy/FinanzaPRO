@@ -1,5 +1,4 @@
 
-
 import { Transaction } from './types';
 
 export const CATEGORIES = [
@@ -65,8 +64,8 @@ export const TRANSLATIONS = {
     data: "Análisis",
     aiCoach: "Chat",
     balance: "Balance Neto",
-    income: "Entradas",
-    expenses: "Salidas",
+    income: "Ingresos", // Changed to match term
+    expenses: "Gastos", // Changed to match term
     recentActivity: "Actividad Reciente",
     noActivity: "No hay actividad registrada.",
     breakdown: "Desglose de Gastos",
@@ -75,8 +74,8 @@ export const TRANSLATIONS = {
     newEntry: "Nueva Entrada",
     save: "Guardar",
     cancel: "Cancelar",
-    description: "Descripción",
-    amount: "Monto",
+    description: "Nombre de transacción", // Changed per request
+    amount: "Cantidad", // Changed per request
     category: "Categoría",
     type: "Tipo",
     date: "Fecha",
@@ -126,7 +125,7 @@ export const TRANSLATIONS = {
     importData: "Importar CSV",
     dataManagement: "Gestión de Datos",
     fileUploaded: "Archivo importado correctamente.",
-    fileError: "Error al leer el archivo.",
+    fileError: "Error al leer el archivo. Verifica el formato.",
     // Onboarding
     obWelcome: "Bienvenido a FinanzaPro",
     obSubtitle: "Tu sistema operativo financiero personal.",
@@ -173,8 +172,8 @@ export const TRANSLATIONS = {
     newEntry: "New Entry",
     save: "Save",
     cancel: "Cancel",
-    description: "Description",
-    amount: "Amount",
+    description: "Transaction Name", // Aligned
+    amount: "Amount", // Aligned
     category: "Category",
     type: "Type",
     date: "Date",

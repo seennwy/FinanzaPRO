@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Transaction, Currency } from '../types';
 import { ArrowUp, ArrowDown, Trash2, Activity, Filter, Calendar, X, ChevronRight, Maximize2 } from 'lucide-react';

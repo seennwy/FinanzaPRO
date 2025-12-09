@@ -187,6 +187,31 @@ export default function App() {
   const handleImport = async (file: File) => {
     try {
       const importedTransactions = await parseCSV(file);
+      
+      // Update logic to create new categories if they don't exist
+      const newIncomeCats = new Set(incomeCategories);
+      const newExpenseCats = new Set(expenseCategories);
+      let categoriesUpdated = false;
+
+      importedTransactions.forEach(t => {
+        if (t.type === 'income') {
+          if (!newIncomeCats.has(t.category)) {
+            newIncomeCats.add(t.category);
+            categoriesUpdated = true;
+          }
+        } else {
+          if (!newExpenseCats.has(t.category)) {
+            newExpenseCats.add(t.category);
+            categoriesUpdated = true;
+          }
+        }
+      });
+
+      if (categoriesUpdated) {
+        setIncomeCategories(Array.from(newIncomeCats));
+        setExpenseCategories(Array.from(newExpenseCats));
+      }
+
       updateTransactions(importedTransactions);
       alert(t.fileUploaded);
     } catch (error) {
