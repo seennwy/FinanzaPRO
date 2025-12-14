@@ -33,7 +33,8 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
-  // New transaction form state
+  // Transaction form state
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newDesc, setNewDesc] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [newType, setNewType] = useState<'income' | 'expense'>('expense');
@@ -241,26 +242,62 @@ export default function App() {
   const [balanceInt, balanceDec] = balanceFormatted.split(',');
 
   // --- HANDLERS ---
-  const handleAddTransaction = (e: React.FormEvent) => {
+  const handleSaveTransaction = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDesc || !newAmount || !newDate) return;
 
-    const newTransaction: Transaction = {
-      id: Date.now().toString(),
-      description: newDesc,
-      amount: parseFloat(newAmount),
-      type: newType,
-      category: newCategory,
-      date: newDate,
-    };
-
-    const updated = [newTransaction, ...transactions];
-    updateTransactions(updated);
+    if (editingId) {
+      // Edit Mode
+      const updatedTransactions = transactions.map(t => 
+        t.id === editingId 
+        ? { ...t, description: newDesc, amount: parseFloat(newAmount), type: newType, category: newCategory, date: newDate }
+        : t
+      );
+      updateTransactions(updatedTransactions);
+    } else {
+      // Create Mode
+      const newTransaction: Transaction = {
+        id: Date.now().toString(),
+        description: newDesc,
+        amount: parseFloat(newAmount),
+        type: newType,
+        category: newCategory,
+        date: newDate,
+      };
+      const updated = [newTransaction, ...transactions];
+      updateTransactions(updated);
+    }
     
+    closeModal();
+  };
+
+  const handleEditTransaction = (t: Transaction) => {
+     setEditingId(t.id);
+     setNewDesc(t.description);
+     setNewAmount(t.amount.toString());
+     setNewDate(t.date);
+     setNewType(t.type);
+     setNewCategory(t.category);
+     setIsModalOpen(true);
+  };
+
+  const openNewTransactionModal = () => {
+     setEditingId(null);
+     setNewDesc('');
+     setNewAmount('');
+     setNewDate(getToday());
+     // Reset type and category to defaults
+     setNewType('expense');
+     setNewCategory(DEFAULT_EXPENSE[0]);
+     setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingId(null);
     setNewDesc('');
     setNewAmount('');
     setNewDate(getToday());
-    setIsModalOpen(false);
   };
 
   const handleDeleteTransaction = (id: string) => {
@@ -385,7 +422,7 @@ export default function App() {
 
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={openNewTransactionModal}
               className="bg-primary/90 hover:bg-primary text-black px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:shadow-[0_0_20px_rgba(0,227,150,0.4)] transition-all"
             >
               + {t.newEntry}
@@ -471,7 +508,13 @@ export default function App() {
 
         <div className="animate-fade-in-up">
           {activeTab === 'dashboard' && (
-            <TransactionList transactions={transactions} onDelete={handleDeleteTransaction} currency={currency} t={t} />
+            <TransactionList 
+              transactions={transactions} 
+              onDelete={handleDeleteTransaction} 
+              onEdit={handleEditTransaction}
+              currency={currency} 
+              t={t} 
+            />
           )}
 
           {activeTab === 'analytics' && (
@@ -513,7 +556,7 @@ export default function App() {
 
         {/* FAB */}
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={openNewTransactionModal}
           className="h-16 w-16 rounded-full bg-textMain text-background flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all shrink-0 border-4 border-surface"
         >
           <Plus className="w-7 h-7" strokeWidth={3} />
@@ -556,18 +599,20 @@ export default function App() {
         theme={theme}
       />
 
-      {/* Add Transaction Modal */}
+      {/* Add/Edit Transaction Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className={`glass-strong rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate-scale-in border border-white/20`}>
             <div className={`p-6 border-b border-white/10 flex justify-between items-center`}>
-              <h3 className={`text-sm font-bold uppercase tracking-widest text-textMain`}>{t.newEntry}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-textMuted hover:text-textMain transition-colors">
+              <h3 className={`text-sm font-bold uppercase tracking-widest text-textMain`}>
+                {editingId ? (language === 'es' ? 'Editar Entrada' : 'Edit Entry') : t.newEntry}
+              </h3>
+              <button onClick={closeModal} className="text-textMuted hover:text-textMain transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <form onSubmit={handleAddTransaction} className="p-6 space-y-5">
+            <form onSubmit={handleSaveTransaction} className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"

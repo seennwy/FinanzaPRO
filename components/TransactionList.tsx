@@ -1,17 +1,18 @@
 
 import React, { useState, useMemo } from 'react';
 import { Transaction, Currency } from '../types';
-import { ArrowUp, ArrowDown, Trash2, Activity, Filter, Calendar, X, ChevronRight, Maximize2 } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Activity, Filter, Calendar, X, ChevronRight, Maximize2, Pencil } from 'lucide-react';
 import { TransactionHistoryModal } from './TransactionHistoryModal';
 
 interface Props {
   transactions: Transaction[];
   onDelete: (id: string) => void;
+  onEdit: (transaction: Transaction) => void;
   currency: Currency;
   t: any;
 }
 
-export const TransactionList: React.FC<Props> = ({ transactions, onDelete, currency, t }) => {
+export const TransactionList: React.FC<Props> = ({ transactions, onDelete, onEdit, currency, t }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [startDate, setStartDate] = useState('');
@@ -138,17 +139,26 @@ export const TransactionList: React.FC<Props> = ({ transactions, onDelete, curre
                 </div>
               </div>
               
-              {/* Right Side: Amount + Delete Action */}
-              <div className="flex items-center gap-4 shrink-0">
+              {/* Right Side: Amount + Actions */}
+              <div className="flex items-center gap-3 shrink-0">
                 <span className={`text-sm font-bold font-mono whitespace-nowrap drop-shadow-md ${t.type === 'income' ? 'text-primary' : 'text-textMain'}`}>
                   {t.type === 'income' ? '+' : '-'} {Math.abs(t.amount).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                 </span>
-                <button 
-                  onClick={() => onDelete(t.id)}
-                  className="opacity-100 lg:opacity-0 group-hover:opacity-100 p-2 text-textMuted hover:text-danger hover:bg-danger/10 rounded-full transition-all"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                
+                <div className="flex items-center opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => onEdit(t)}
+                      className="p-2 text-textMuted hover:text-primary hover:bg-primary/10 rounded-full transition-all"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => onDelete(t.id)}
+                      className="p-2 text-textMuted hover:text-danger hover:bg-danger/10 rounded-full transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                </div>
               </div>
             </div>
           ))}
