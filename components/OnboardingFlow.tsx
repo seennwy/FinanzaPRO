@@ -193,7 +193,7 @@ export const OnboardingFlow: React.FC<Props> = ({ onComplete, t, initialRecurrin
            </div>
            
            <h1 className="text-5xl md:text-7xl font-black tracking-tighter drop-shadow-2xl">
-             FINANZA<span className="text-textMuted font-light">PRO</span>
+             FYNEX
            </h1>
            
            <p className="text-xl text-textMuted max-w-md font-light leading-relaxed glass p-4 rounded-xl border-none">

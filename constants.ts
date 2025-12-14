@@ -1,5 +1,5 @@
 
-import { Transaction } from './types';
+import { Transaction, RecurringItem } from './types';
 
 export const CATEGORIES = [
   'Alimentación',
@@ -51,7 +51,7 @@ export const COLORS = [
   '#FF9800'  // Orange
 ];
 
-export const RECURRING_ITEMS = [
+export const RECURRING_ITEMS: RecurringItem[] = [
   { id: 'salary', label: 'Salario Mensual', type: 'income', category: 'Salario', defaultAmount: 2500, icon: '💰' },
   { id: 'rent', label: 'Alquiler / Hipoteca', type: 'expense', category: 'Vivienda', defaultAmount: 800, icon: '🏠' },
   { id: 'utilities', label: 'Internet / Luz / Agua', type: 'expense', category: 'Vivienda', defaultAmount: 100, icon: '💡' },
@@ -137,7 +137,7 @@ export const TRANSLATIONS = {
     fileUploaded: "Archivo importado correctamente.",
     fileError: "Error al leer el archivo. Verifica el formato.",
     // Onboarding
-    obWelcome: "Bienvenido a FinanzaPro",
+    obWelcome: "Bienvenido a Fynex",
     obSubtitle: "Tu sistema operativo financiero personal.",
     obStart: "Comenzar Configuración",
     obNameTitle: "¿Cómo te llamas?",
@@ -251,7 +251,7 @@ export const TRANSLATIONS = {
     fileUploaded: "File imported successfully.",
     fileError: "Error reading file.",
     // Onboarding
-    obWelcome: "Welcome to FinanzaPro",
+    obWelcome: "Welcome to Fynex",
     obSubtitle: "Your personal financial operating system.",
     obStart: "Start Setup",
     obNameTitle: "What's your name?",

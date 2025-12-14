@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Transaction, Currency } from '../types';
-import { ArrowUp, ArrowDown, Trash2, Activity, Filter, Calendar, X, ChevronRight, Maximize2, Pencil } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Activity, Filter, Calendar, X, ChevronRight, Maximize2, Pencil, AlertTriangle } from 'lucide-react';
 import { TransactionHistoryModal } from './TransactionHistoryModal';
 
 interface Props {
@@ -17,6 +17,9 @@ export const TransactionList: React.FC<Props> = ({ transactions, onDelete, onEdi
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  
+  // State for delete confirmation
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
@@ -43,6 +46,13 @@ export const TransactionList: React.FC<Props> = ({ transactions, onDelete, onEdi
     setStartDate('');
     setEndDate('');
     setIsFilterOpen(false);
+  };
+
+  const confirmDelete = () => {
+    if (deleteId) {
+      onDelete(deleteId);
+      setDeleteId(null);
+    }
   };
 
   const hasActiveFilters = startDate || endDate;
@@ -153,7 +163,7 @@ export const TransactionList: React.FC<Props> = ({ transactions, onDelete, onEdi
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button 
-                      onClick={() => onDelete(t.id)}
+                      onClick={() => setDeleteId(t.id)}
                       className="p-2 text-textMuted hover:text-danger hover:bg-danger/10 rounded-full transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -180,6 +190,37 @@ export const TransactionList: React.FC<Props> = ({ transactions, onDelete, onEdi
           )}
         </div>
       </div>
+
+      {/* Confirmation Popup Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="glass-card max-w-sm w-full p-6 rounded-[2rem] shadow-2xl animate-scale-in border border-white/10">
+             <div className="flex flex-col items-center text-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-danger/10 text-danger flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(255,69,96,0.3)]">
+                   <AlertTriangle className="w-8 h-8" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-textMain">¿Estás seguro?</h3>
+                  <p className="text-sm text-textMuted mt-2 leading-relaxed">¿Quieres eliminar este dato permanentemente? Esta acción no se puede deshacer.</p>
+                </div>
+                <div className="flex gap-3 w-full mt-4">
+                   <button
+                     onClick={() => setDeleteId(null)}
+                     className="flex-1 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-surfaceHighlight text-textMuted hover:text-textMain hover:bg-surfaceHighlight/80 transition-colors"
+                   >
+                     {t.cancel}
+                   </button>
+                   <button
+                     onClick={confirmDelete}
+                     className="flex-1 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-danger text-white hover:bg-danger/90 transition-all shadow-lg shadow-danger/20 hover:scale-[1.02]"
+                   >
+                     Eliminar
+                   </button>
+                </div>
+             </div>
+          </div>
+        </div>
+      )}
 
       {/* Full Screen History Modal */}
       <TransactionHistoryModal 

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Transaction, Language, Currency } from '../types';
 import { sendFinancialChatMessage } from '../services/geminiService';
@@ -79,7 +80,7 @@ export const ChatAssistant: React.FC<Props> = ({ transactions, lang, currency, t
           <Bot className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-widest text-textMain">Finanza AI</h3>
+          <h3 className="text-sm font-bold uppercase tracking-widest text-textMain">Fynex AI</h3>
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_5px_rgba(0,227,150,0.8)]"></span>
             <span className="text-[10px] text-textMuted uppercase tracking-wider">Online</span>

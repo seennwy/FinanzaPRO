@@ -402,7 +402,7 @@ export default function App() {
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-black bg-gradient-to-br from-white to-gray-300 shadow-lg`}>
               <Activity className="w-5 h-5" />
             </div>
-            <span className={`text-lg font-bold tracking-tight text-textMain`}>FINANZA<span className="font-light text-textMuted">PRO</span></span>
+            <span className={`text-lg font-bold tracking-tight text-textMain`}>FYNEX</span>
           </div>
           
           <nav className="flex items-center gap-1 p-1 bg-surfaceHighlight rounded-full border border-white/5">
@@ -447,8 +447,7 @@ export default function App() {
               <Activity className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <span className={`font-bold tracking-tight text-xl block leading-none text-textMain`}>FINANZA</span>
-              <span className="font-light text-textMuted text-xs tracking-widest">PRO</span>
+              <span className={`font-bold tracking-tight text-xl block leading-none text-textMain`}>FYNEX</span>
             </div>
            </div>
            <button 

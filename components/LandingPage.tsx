@@ -25,7 +25,7 @@ export const LandingPage: React.FC<Props> = ({ onLoginClick, t }) => {
         </div>
 
         <h1 className="text-4xl md:text-6xl font-black tracking-tighter">
-          FINANZA<span className="text-textMuted font-light">PRO</span>
+          FYNEX
         </h1>
 
         <div className="space-y-4">
